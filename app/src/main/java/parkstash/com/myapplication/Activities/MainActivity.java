@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity
                         // your action here
                         mMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(lat,lng))
-                                .icon(BitmapDescriptorFactory.fromBitmap(createTag("42")))
+                                .icon(BitmapDescriptorFactory.fromBitmap(createTag("$42")))
                                 // Specifies the anchor to be at a particular point in the marker image.
                                 .anchor(0.5f, 1));
                         locations.add(new Location(lat, lng, "$42"));
