@@ -1,4 +1,4 @@
-package parkstash.com.myapplication;
+package parkstash.com.myapplication.Objects;
 
 /**
  * Created by mihir on 4/5/2018.

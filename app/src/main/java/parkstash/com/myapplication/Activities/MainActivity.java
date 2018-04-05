@@ -1,4 +1,4 @@
-package parkstash.com.myapplication;
+package parkstash.com.myapplication.Activities;
 
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -35,6 +35,9 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
+import parkstash.com.myapplication.Objects.Location;
+import parkstash.com.myapplication.R;
 
 
 public class MainActivity extends AppCompatActivity
