@@ -16,7 +16,8 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <EditText
+
+        <!--<EditText
             android:id="@+id/id_search_EditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -31,6 +32,24 @@
             android:textColor="@android:color/white"
             android:textSize="15sp"
             android:theme="@style/EditTextTheme" />
+-->
+        <com.seatgeek.placesautocomplete.PlacesAutocompleteTextView
+            android:id="@+id/autocomplete"
+            android:layout_marginTop="20dp"
+            android:drawableEnd="@drawable/ic_location_searching_white_24dp"
+            android:layout_marginLeft="45dp"
+            android:layout_marginRight="45dp"
+            android:layout_width="fill_parent"
+            android:textColor="#ffffff"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            app:pacv_languageCode="en"
+            app:pacv_resultType="no_type"
+            android:background="@drawable/bottom_border"
+            app:pacv_googleMapsApiKey="@string/google_mapkey"
+            app:pacv_adapterClass="parkstash.com.myapplication.Objects.TestPlacesAutocompleteAdapter"
+            android:drawableRight="@drawable/ic_location_searching_white_24dp" />
+
 
         <EditText
             android:id="@+id/id_search_EditText1"

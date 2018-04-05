@@ -1,11 +1,15 @@
 package parkstash.com.myapplication.Activities;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -20,6 +24,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -31,7 +36,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.seatgeek.placesautocomplete.DetailsCallback;
+import com.seatgeek.placesautocomplete.OnPlaceSelectedListener;
+import com.seatgeek.placesautocomplete.PlacesAutocompleteTextView;
+import com.seatgeek.placesautocomplete.model.AddressComponent;
+import com.seatgeek.placesautocomplete.model.AddressComponentType;
+import com.seatgeek.placesautocomplete.model.Place;
+import com.seatgeek.placesautocomplete.model.PlaceDetails;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,12 +62,32 @@ public class MainActivity extends AppCompatActivity
     SharedPreferences.Editor prefsEditor;
     SharedPreferences appSharedPrefs;
     List<Location> locations = new ArrayList<Location>();
+    PlacesAutocompleteTextView mAutocomplete;
+    double lat,lng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mAutocomplete = (PlacesAutocompleteTextView) findViewById(R.id.autocomplete);
+        mAutocomplete.setLongClickable(false);
+        mAutocomplete.setOnPlaceSelectedListener(new OnPlaceSelectedListener() {
+            @Override
+            public void onPlaceSelected(final Place place) {
+                mAutocomplete.getDetailsFor(place, new DetailsCallback() {
+                    @Override
+                    public void onSuccess(final PlaceDetails details) {
+                        lat = details.geometry.location.lat;
+                        lng = details.geometry.location.lng;
+                    }
 
+                    @Override
+                    public void onFailure(final Throwable failure) {
+                        Log.d("test", "failure " + failure);
+                    }
+                });
+            }
+        });
         appSharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this.getApplicationContext());
         String restoredText = appSharedPrefs.getString("MyLocations", null);
@@ -170,12 +203,42 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
         mMap = googleMap;
         mMap.setOnMapClickListener(this);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.309788, -121.968433), 7));
+
+        mAutocomplete.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_LEFT = 0;
+                final int DRAWABLE_TOP = 1;
+                final int DRAWABLE_RIGHT = 2;
+                final int DRAWABLE_BOTTOM = 3;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (mAutocomplete.getRight() - mAutocomplete.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        // your action here
+                        mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(lat,lng))
+                                .icon(BitmapDescriptorFactory.fromBitmap(createTag("42")))
+                                // Specifies the anchor to be at a particular point in the marker image.
+                                .anchor(0.5f, 1));
+                        locations.add(new Location(lat, lng, "$42"));
+                        Gson gson = new Gson();
+                        String json = gson.toJson(locations);
+                        prefsEditor = appSharedPrefs.edit();
+                        prefsEditor.putString("MyLocations", json);
+                        prefsEditor.apply();
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
 
         for (int i = 0; i < locations.size(); i++) {
             Log.d("ParkStash", "onMapReady: cost " + locations.get(i).getCost());
@@ -184,6 +247,7 @@ public class MainActivity extends AppCompatActivity
                     .icon(BitmapDescriptorFactory.fromBitmap(createTag(locations.get(i).getCost())))
                     // Specifies the anchor to be at a particular point in the marker image.
                     .anchor(0.5f, 1));
+
         }
     }
 
@@ -194,14 +258,14 @@ public class MainActivity extends AppCompatActivity
 
     public Bitmap createTag(String tag) {
         Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.pin_bruh);
-        Bitmap bmp1 = Bitmap.createScaledBitmap(bmp, 120, 120, false);
+        Bitmap bmp1 = Bitmap.createScaledBitmap(bmp, 75, 75, false);
         Canvas canvas1 = new Canvas(bmp1);
         // paint defines the text color, stroke width and size
         Paint color = new Paint();
-        color.setTextSize(35);
+        color.setTextSize(20);
         color.setColor(Color.WHITE);
         // modify canvas
-        canvas1.drawText(tag, 30, 40, color);
+        canvas1.drawText(tag, 20, 25, color);
         return bmp1;
     }
 
